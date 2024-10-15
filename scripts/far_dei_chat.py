@@ -38,4 +38,7 @@ class FarDeiChat:
         :param thread_id:
         :return:
         """
-        return FarDeiParser().chat(question, thread_id)
+        try:
+            return FarDeiParser().chat(question, thread_id)
+        except Exception as e:
+            raise e

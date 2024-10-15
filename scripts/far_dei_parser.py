@@ -162,7 +162,8 @@ class FarDeiParser:
 
             except Exception as e:
                 self.logger.error(f"An error occurred while retrieving data: {str(e)}")
-                return {'An error occurred while retrieving data: ': str(e)}
+                raise
+
 
             self.logger.debug(f"Retrieved SQL data: {retrieved_data}")
 
@@ -184,4 +185,4 @@ class FarDeiParser:
 
         except Exception as e:
             self.logger.error(f"An error occurred in the chat method: {str(e)}")
-            return {'An error occurred in the chat method: ': str(e)}
+            raise e
