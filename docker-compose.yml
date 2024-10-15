@@ -1,0 +1,23 @@
+services:
+    flask:
+        build: .
+        container_name: ai_flask
+        ports:
+            - "9001:9001"
+        volumes:
+            - .:/flaskapp
+        depends_on:
+            - redis
+        networks:
+            - far_ai
+
+    redis:
+      image: redis
+      container_name: ai_redis
+      ports:
+        - "6379:6379"
+      networks:
+        - far_ai
+
+networks:
+  far_ai:
