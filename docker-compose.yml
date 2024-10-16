@@ -10,6 +10,11 @@ services:
             - redis
         networks:
             - far_ai
+        healthcheck:
+          test: [ "CMD", "curl", "-f", "http://localhost:9001/health" ]
+          interval: 30s
+          timeout: 10s
+          retries: 3
 
     redis:
       image: redis
