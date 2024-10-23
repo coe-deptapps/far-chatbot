@@ -14,7 +14,17 @@ WORKDIR /flaskapp
 # Copy the current directory contents into the container at /app
 COPY . /flaskapp
 
-RUN cd /flaskapp && mkdir -p logs
+# Add this line if you haven't already to create the logs directory
+RUN mkdir -p /flaskapp/logs
+
+# Change the ownership of the logs directory to the user running the application
+RUN chown -R 1001:0 /flaskapp/logs
+
+# Optionally, change permissions to ensure write access
+RUN chmod -R g+rw /flaskapp/logs
+
+# Switch to the user (e.g., default is non-root user with user id 1001 on OpenShift)
+USER 1001
 
 # Install any necessary dependencies specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
