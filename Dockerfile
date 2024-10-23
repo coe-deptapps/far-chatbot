@@ -23,9 +23,6 @@ RUN chown -R 1001:0 /flaskapp/logs
 # Optionally, change permissions to ensure write access
 RUN chmod -R g+rw /flaskapp/logs
 
-# Switch to the user (e.g., default is non-root user with user id 1001 on OpenShift)
-USER 1001
-
 # Install any necessary dependencies specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
