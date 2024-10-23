@@ -1,0 +1,163 @@
+apiVersion: v1
+data:
+  .env: |-
+    OPENAI_API_KEY=28e5126cbd314803ad481a4ab2aa9a15
+    OPENAI_ORGANIZATION=103358
+    OPENAI_BASE=https://api.umgpt.umich.edu/azure-openai-api
+    OPENAI_VERSION=2023-05-15
+    OPENAI_GPT_MODEL=gpt-4
+    OPENAI_EMBED_MODEL=text-embedding-ada-002
+    OPENAI_TYPE=azure
+    PINECONE_API_KEY=08dafed8-32ef-4bcf-814e-2286154be65f
+    PINECONE_ENV=gcp-starter
+    LANGCHAIN_API_KEY=ls__56ca337e5f3640419109fba3c2bdfa91
+    LANGCHAIN_TRACING_V2=true
+    DB_SERVER=coeappdev-db.miserver.it.umich.edu
+    DB_USER=dev_user
+    DB_PASS=asn39jkcnasASJKH_!dsa1
+    DB_NAME=far
+    LDAP_PASS=w5S9sxMhKgaU
+  .gitignore: "# flaskapp specific stuff\nflaskapp/\n*.log\npyvenv.cfg\n\n# Byte-compiled / optimized / DLL files\n__pycache__/\n*.py[cod]\n*$py.class\n\n# C extensions\n*.so\n\n# Distribution / packaging\n.Python\n.env\nenv/\nbin/\nbuild/\ndevelop-eggs/\ndist/\ndownloads/\neggs/\n.eggs/\nlib/\nlib64/\nparts/\nsdist/\nvar/\nwheels/\npip-wheel-metadata/\nshare/python-wheels/\n*.egg-info/\n.installed.cfg\n*.egg\nMANIFEST\n\n# PyInstaller\n# Usually these files are written by a PyInstaller build phase and deleted by a PyInstaller clean phase\n# but they will still exist if you start a new build phase before a cleanup.\n# Comment out if including in version control.\n# PyInstaller ignores the directories when calculating hashes\n# and copies the files directly when they exist.\n.Python/\n# distribution / packaging\n\n# Installer logs\npip-log.txt\npip-delete-this-directory.txt\n\n# Unit test / coverage reports\nhtmlcov/\n.tox/\n.nox/\n.coverage\n.coverage.*\n.cache\nnosetests.xml\ncoverage.xml\n*.cover\n*.py,cover\n*.junit.xml\n.hypothesis/\n.pytest_cache/\n\n# Translations\n*.mo\n*.pot\n\n# Django stuff:\n*.log\nlocal_settings.py\ndb.sqlite3\ndb.sqlite3-journal\n\n# Flask stuff:\ninstance/\n.webassets-cache\n\n# Scrapy stuff:\n.scrapy\n\n# Sphinx documentation\ndocs/_build/\n\n# PyBuilder\ntarget/\n\n# IPython\nprofile_default/\nipython_config.py\n\n# Jupyter Notebook\n.ipynb_checkpoints\n\n# pyenv\n.python-version\n\n# pipenv\n# according to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.\n# pipenv: specific to each project\nPipfile.lock\n\n# celery beat schedule file\ncelerybeat-schedule\n\n# VS Code\n.vscode\n\n# pycharm\n.idea/\n\n# mypy\n.mypy_cache/\n.dmypy.json\ndmypy.json\n\n#mac \n.DS_Store\n"
+  __init__.py: ""
+  __version__.py: |+
+    __version__ = "0.0.2"
+
+
+  Dockerfile: |
+    # Use the official Python image from the Docker Hub
+    #FROM python:3.9-slim
+    FROM image-registry.openshift-image-registry.svc:5000/openshift/python:3.9
+
+    # Install system dependencies
+    RUN apt-get update && apt-get install -y \
+        build-essential \
+        default-libmysqlclient-dev \
+        pkg-config
+
+    # Set the working directory in the container
+    WORKDIR /flaskapp
+
+    # Copy the current directory contents into the container at /app
+    COPY . /flaskapp
+
+    # Add this line if you haven't already to create the logs directory
+    RUN mkdir -p /flaskapp/logs
+
+    # Change the ownership of the logs directory to the user running the application
+    RUN chown -R 1001:0 /flaskapp/logs
+
+    # Optionally, change permissions to ensure write access
+    RUN chmod -R g+rw /flaskapp/logs
+
+    # Install any necessary dependencies specified in requirements.txt
+    RUN pip install --no-cache-dir -r requirements.txt
+
+    # Make port 9001 available to the world outside this container
+    EXPOSE 9001
+
+    # Define environment variable
+    ENV FLASK_APP=flaskapp.py
+
+    # Run app.py when the container launches
+    CMD ["flask", "run", "--host=0.0.0.0", "--port=9001"]
+  README.md: "# FAR DEI Chatbot\n[//]: # ([![Build Status]&#40;https://travis-ci.com/chyke007/credible.svg?branch=master&#41;]&#40;https://travis-ci.com/chyke007/credible&#41;)\n![version](https://img.shields.io/badge/version-0.4.0-blue)\n![Python Version](https://img.shields.io/badge/Python-v3.9.x-yellow)\n\n\n## Setup on AWS\n1. Created an EC2 instance (Ubuntu t2.micro)\n2. Installed docker and docker compose\n3. Created an SSH key pair. Added the public key to Chris's github account. Enabled access to the CAEN group. Then globally set the user and email for github in the EC2 instance.\n`git config --global user.name \"Chris Puzzuoli\"` `git config --global user.email \"cpuzzuol@umich.edu\"`\n4. Cloned the far-dei-flask repository to the EC2 instance inside the `/home/ubuntu` directory. `git clone git@github.com:coe-deptapps/far-dei-flask.git`\n5. Created a `.env` file in the root directory of the project (ask Chris for values)\n6. Created a `logs/` directory in the root of the project.\n7. Ran `docker-compose build` to build the containers.\n8. Ran `docker-compose up -d` to start the containers (detached mode).\n9. Installed nginx on the EC2 instance.\n- `sudo apt update` \n- `sudo apt install nginx`\n10. Set up SSL using self-signed certificates (since Certbot can't be used unless a domain is purchased).\n- `sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt`\n- `sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048`\n  - `sudo nano /etc/nginx/snippets/self-signed.conf`\n      - Add the following lines:\n  \n            ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;\n            ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;\n  \n- `sudo nano /etc/nginx/snippets/ssl-params.conf`\n  - Add the following lines:\n  \n        ssl_protocols TLSv1.2 TLSv1.3;\n        ssl_prefer_server_ciphers on;\n        ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256';\n        ssl_dhparam /etc/ssl/certs/dhparam.pem;\n        ssl_session_timeout 1d;\n        ssl_session_cache shared:SSL:10m;\n        add_header Strict-Transport-Security \"max-age=63072000; includeSubdomains; preload\";\n        add_header X-Frame-Options DENY;\n        add_header X-Content-Type-Options nosniff;\n  \n- `sudo nano /etc/nginx/sites-available/default`\n  - Add the following lines:\n  \n        server {\n            listen 80;\n            server_name _;\n\n            location / {\n            return 301 https://$host$request_uri;\n            }\n        }\n        server {\n            listen 443 ssl;\n            server_name _;\n            \n            ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;\n            ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;\n            include /etc/nginx/snippets/ssl-params.conf;\n            \n            location / {\n                proxy_pass http://localhost:9001;\n                proxy_set_header Host $host;\n                proxy_set_header X-Real-IP $remote_addr;\n                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n                proxy_set_header X-Forwarded-Proto $scheme;\n            }\n        }\n  - `sudo nginx -t` to test the configuration\n  - `sudo systemctl restart nginx` to restart nginx\n\n11. Set outbound rules for the EC2 instance to allow traffic on `port 443`.\n12. The chatbot should now be accessible at `https://<EC2_PUBLIC_IP>`\n13. To ensure redis is running, you can install redis on the EC2 instance (`sudo apt-get install redis-tools`) and run `redis-cli ping` to check if it's running (response will be `PONG` if successful)."
+  docker-compose.yml: |-
+    services:
+        flask:
+            build: .
+            container_name: ai_flask
+            ports:
+                - "9001:9001"
+            volumes:
+                - .:/flaskapp
+            depends_on:
+                - redis
+            networks:
+                - far_ai
+            healthcheck:
+              test: [ "CMD", "curl", "-f", "http://localhost:9001/health" ]
+              interval: 30s
+              timeout: 10s
+              retries: 3
+
+        redis:
+          image: redis
+          container_name: ai_redis
+          ports:
+            - "6379:6379"
+          networks:
+            - far_ai
+
+    networks:
+      far_ai:
+  flaskapp.py: |
+    from flask import Flask, request, abort
+    from flask_cors import CORS
+    from langchain.load.dump import dumps
+
+    from flaskapp.scripts.far_dei_chat import FarDeiChat
+
+    app = Flask(__name__)
+    cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+    print("Flask app started")
+
+    @app.post("/api/v1/fardeichat")
+    def deptbot_fardei_ask():
+        """
+        This function is responsible for chatting with the AI about FAR DEI activity.
+        :return: void
+        """
+        question = request.form.get('question')
+        thread_id = request.form.get('thread_id')
+        if thread_id == 'null':
+            thread_id = ''
+
+        chat = FarDeiChat()
+        try:
+            answer = chat.far_dei_ask(question, thread_id)
+            return dumps(answer)
+        except Exception as e:
+            app.logger.error(f"An error occurred: {str(e)}")
+            abort(500, description=f"An error occurred: {str(e)}")
+
+    @app.get("/api/v1/health")
+    def health():
+        return "ok"
+
+
+    if __name__ == '__main__':
+        app.run(debug=True, port=9001)
+  requirements.txt: |-
+    networkx==3.2.1
+    numpy==1.26.4
+    openai==1.52.0
+    python-dotenv==1.0.1
+    tqdm==4.66.4
+    pinecone-client==5.0.1
+    tiktoken==0.8.0
+    matplotlib==3.9.0
+    pillow==10.3.0
+    scipy==1.13.1
+    pandas==2.2.2
+    langchain==0.2.16
+    langchain-community==0.2.16
+    langchain-core==0.2.41
+    langchain-experimental==0.0.65
+    langchain-openai==0.1.25
+    langchain-pinecone==0.1.3
+    langchain-text-splitters==0.2.4
+    langchainhub==0.1.21
+    langcodes==3.3.0
+    langgraph==0.1.14
+    langsmith==0.1.137
+    pymysql==1.1.1
+    flask==3.0.3
+    redis==5.1.1
+    pypdf==3.16.2
+    flask-cors==4.0.2
+    Flask-SQLAlchemy==3.1.1
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: flask
+  name: flask-cm0
