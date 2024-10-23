@@ -14,7 +14,7 @@ WORKDIR /flaskapp
 # Copy the current directory contents into the container at /app
 COPY . /flaskapp
 
-RUN cd /flaskapp && mkdir -p /logs
+RUN cd /flaskapp && mkdir -p logs
 
 # Install any necessary dependencies specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
