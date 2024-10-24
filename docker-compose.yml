@@ -16,6 +16,7 @@ services:
           timeout: 10s
           retries: 3
 
+
     redis:
       image: redis
       container_name: ai_redis
