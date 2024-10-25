@@ -128,6 +128,8 @@ class FarDeiParser:
                         Then you should query the schema of the most relevant tables. These tables will typically be 'far' and any table that starts with 'far_dei_'. But you can also check any table that ends in '_summary'.
 
                         If you are asked about department-specific questions, you can look up the name of and the department ID for the department in the departments table.
+                        Most tables have a farID foreign key. You can use that column to join on far.far, which has the deptID field. Departments will usually be referred to by their acronym (e.g. CSE, BME, AERO, etc.), but you can look up the full name in the departments table.
+                        
                         Answers should always return the name of the department, even if the user asked the question in terms of the department ID.
                         """
 
