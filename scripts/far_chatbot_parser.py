@@ -31,19 +31,19 @@ llm = AzureChatOpenAI(
 )
 
 
-class FarDeiParser:
+class FarChatbotParser:
     """
     Take a user question and generate RAG-style answer.
     """
     # Create a logger
-    logger = logging.getLogger('far_dei_sql_bot')
+    logger = logging.getLogger('far_chatbot_sql_bot')
 
     # Set the level of this logger. This level acts as a threshold.
     # Any message below this level will be ignored
     logger.setLevel(logging.DEBUG)
 
     # Create a file handler
-    handler = logging.FileHandler('../logs/far_dei_parser.log')
+    handler = logging.FileHandler('../logs/far_chatbot_parser.log')
 
     # Create a formatter and add it to the handler
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -101,8 +101,8 @@ class FarDeiParser:
         """
         context = (f"Conversation history: {conversation_history}\nRetrieved Data: {retrieved_data}."
                    f"\nBased on the retrieved data and the conversation history, generate a comprehensive response."
-                   f"\nKeep in mind that you are responding to questions about Diversity, Equity, and Inclusion data in Faculty Activity Reports (FAR) for the University of Michigan."
-                   f"\nIf you believe the user's question is not related to DEI, do not answer it. Please inform them and ask them to rephrase it.")
+                   f"\nKeep in mind that you are responding to questions about faculty service data in Faculty Activity Reports (FAR) for the University of Michigan."
+                   f"\nIf you believe the user's question is not related to faculty service, do not answer it. Please inform them and ask them to rephrase it.")
         return context
 
     def chat(self, question, thread_id=''):
@@ -115,10 +115,10 @@ class FarDeiParser:
             tools = self.create_tools()
 
             SQL_PREFIX = """You are an agent designed to interact with a SQL database that stores Faculty Activity Reports (FAR) data for the University of Michigan.
-                        Specifically, you are answering questions related to Diversity, Equity, and Inclusion (DEI) data.
-                        If the question is not related to DEI (even if it is related to the FAR database generally), do not continue except to tell the user that you are unable to answer the question and ask them to rephrase it so that it is related to DEI.
+                        Specifically, you are answering questions related to faculty service data.
+                        If the question is not related to faculty service (even if it is related to the FAR database generally), do not continue except to tell the user that you are unable to answer the question and ask them to rephrase it so that it is related to faculty service data.
                         
-                        If the question is DEI related, continue following the instructions.
+                        If the question is faculty service related, continue following the instructions.
                         Given an input question, create a syntactically correct SQL query to run, then look at the results of the query and return the answer.
                         Unless the user specifies a specific number of examples they wish to obtain, always limit your query to at most 5 results.
                         You can order the results by a relevant column to return the most interesting examples in the database.
@@ -131,7 +131,7 @@ class FarDeiParser:
 
                         To start you should ALWAYS look at the tables in the database to see what you can query.
                         Do NOT skip this step.
-                        Then you should query the schema of the most relevant tables. These tables will typically be 'far' and any table that starts with 'far_dei_'. But you can also check any table that ends in '_summary'.
+                        Then you should query the schema of the most relevant tables. The table you will want to focus on most is 'far_snapshot_service_positions'.
 
                         If you are asked about department-specific questions, you can look up the name of and the department ID for the department in the departments table.
                         Most tables have a farID foreign key. You can use that column to join on far.far, which has the deptID field. Departments will usually be referred to by their acronym (e.g. CSE, BME, AERO, etc.), but you can look up the full name in the departments table.

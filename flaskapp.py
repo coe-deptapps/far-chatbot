@@ -2,16 +2,16 @@ from flask import Flask, request, abort
 from flask_cors import CORS
 from langchain.load.dump import dumps
 
-from scripts.far_dei_chat import FarDeiChat
+from scripts.far_chatbot_chat import FarChatbotChat
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 print("Flask app started")
 
-@app.post("/api/v1/fardeichat")
-def deptbot_fardei_ask():
+@app.post("/api/v1/farchat")
+def deptbot_far_ask():
     """
-    This function is responsible for chatting with the AI about FAR DEI activity.
+    This function is responsible for chatting with the AI about FAR service activity.
     :return: void
     """
     question = request.form.get('question')
@@ -19,9 +19,9 @@ def deptbot_fardei_ask():
     if thread_id == 'null':
         thread_id = ''
 
-    chat = FarDeiChat()
+    chat = FarChatbotChat()
     try:
-        answer = chat.far_dei_ask(question, thread_id)
+        answer = chat.far_chatbot_ask(question, thread_id)
         return dumps(answer)
     except Exception as e:
         app.logger.error(f"An error occurred: {str(e)}")
