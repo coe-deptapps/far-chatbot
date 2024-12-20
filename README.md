@@ -1,4 +1,4 @@
-# FAR DEI Chatbot
+# FAR Chatbot
 [//]: # ([![Build Status]&#40;https://travis-ci.com/chyke007/credible.svg?branch=master&#41;]&#40;https://travis-ci.com/chyke007/credible&#41;)
 ![version](https://img.shields.io/badge/version-0.4.0-blue)
 ![Python Version](https://img.shields.io/badge/Python-v3.9.x-yellow)
@@ -9,7 +9,7 @@
 2. Installed docker and docker compose
 3. Created an SSH key pair. Added the public key to Chris's github account. Enabled access to the CAEN group. Then globally set the user and email for github in the EC2 instance.
 `git config --global user.name "Chris Puzzuoli"` `git config --global user.email "cpuzzuol@umich.edu"`
-4. Cloned the far-dei-flask repository to the EC2 instance inside the `/home/ubuntu` directory. `git clone git@github.com:coe-deptapps/far-dei-flask.git`
+4. Cloned the far-chatbot repository to the EC2 instance inside the `/home/ubuntu` directory. `git clone git@github.com:coe-deptapps/far-chatbot.git`
 5. Created a `.env` file in the root directory of the project (ask Chris for values)
 6. Created a `logs/` directory in the root of the project.
 7. Ran `docker-compose build` to build the containers.
