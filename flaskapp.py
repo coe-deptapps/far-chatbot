@@ -2,7 +2,7 @@ from flask import Flask, request, abort
 from flask_cors import CORS
 from langchain.load.dump import dumps
 
-from flaskapp.scripts.far_dei_chat import FarDeiChat
+from scripts.far_dei_chat import FarDeiChat
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})

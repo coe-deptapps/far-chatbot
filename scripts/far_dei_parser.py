@@ -15,12 +15,12 @@ import json
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # Load environment file for secrets.
-# try:
-#     if load_dotenv('../.env') is False:
-#         raise TypeError
-# except TypeError:
-#     print('Unable to load .env file.')
-#     quit()
+try:
+    if load_dotenv('../.env') is False:
+        raise TypeError
+except TypeError:
+    print('Unable to load .env file.')
+    quit()
 
 llm = AzureChatOpenAI(
     deployment_name=os.environ['OPENAI_GPT_MODEL'],
@@ -54,7 +54,13 @@ class FarDeiParser:
 
     def __init__(self):
         self.db = None
-        self.redis_client = redis.Redis(host='redis', port=6379, db=0)
+
+        # If the APP_ENV is development, use 'localhost' as the redis host, if not, use 'redis'.
+        if os.getenv('APP_ENV') == 'development':
+            self.redis_client = redis.Redis(host='localhost', port=6379, db=0)
+        else:
+            self.redis_client = redis.Redis(host='redis', port=6379, db=0)
+
         self.sql_connect()
         if self.db:
             self.tables = self.db.get_usable_table_names()

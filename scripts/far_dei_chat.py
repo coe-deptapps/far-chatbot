@@ -2,7 +2,7 @@ import os
 from langchain_openai import AzureChatOpenAI
 import logging
 
-from flaskapp.scripts.far_dei_parser import FarDeiParser
+from scripts.far_dei_parser import FarDeiParser
 
 llm = AzureChatOpenAI(
         deployment_name=os.environ['OPENAI_GPT_MODEL'],
