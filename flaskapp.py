@@ -1,6 +1,10 @@
+import sys, os
 from flask import Flask, request, abort
 from flask_cors import CORS
 from langchain.load.dump import dumps
+
+# Add the project root directory to PYTHONPATH
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from scripts.far_chatbot_chat import FarChatbotChat
 
