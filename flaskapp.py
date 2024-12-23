@@ -4,9 +4,9 @@ from flask_cors import CORS
 from langchain.load.dump import dumps
 
 # Add the project root directory to PYTHONPATH
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from scripts.far_chatbot_chat import FarChatbotChat
+from flaskapp.scripts.far_chatbot_chat import FarChatbotChat
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
