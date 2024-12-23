@@ -14,7 +14,6 @@ import json
 # Sets the current working directory to be the same as the file.
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Load environment file for secrets (development env only!).
 # try:
 #     if load_dotenv('../.env') is False:
