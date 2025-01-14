@@ -9,7 +9,7 @@ from langchain.load.dump import dumps
 # Production
 from flaskapp.scripts.far_chatbot_chat import FarChatbotChat
 # Development
-# from scripts.far_chatbot_chat import FarChatbotChat
+#from scripts.far_chatbot_chat import FarChatbotChat
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
