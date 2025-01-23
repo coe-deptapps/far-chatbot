@@ -43,7 +43,7 @@ class FarChatbotParser:
     logger.setLevel(logging.DEBUG)
 
     # Create a file handler
-    handler = logging.FileHandler('../logs/far_chatbot_parser.log')
+    handler = logging.FileHandler('logs/far_chatbot_parser.log')
 
     # Create a formatter and add it to the handler
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')

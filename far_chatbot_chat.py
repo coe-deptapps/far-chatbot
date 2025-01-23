@@ -2,10 +2,7 @@ import os
 from langchain_openai import AzureChatOpenAI
 import logging
 
-# Production
-from flaskapp.scripts.far_chatbot_parser import FarChatbotParser
-# Development
-#from scripts.far_chatbot_parser import FarChatbotParser
+from far_chatbot_parser import FarChatbotParser
 
 llm = AzureChatOpenAI(
         deployment_name=os.environ['OPENAI_GPT_MODEL'],
@@ -25,7 +22,7 @@ class FarChatbotChat:
     logger.setLevel(logging.DEBUG)
 
     # Create a file handler
-    handler = logging.FileHandler('../logs/far_chatbot_chat.log')
+    handler = logging.FileHandler('logs/far_chatbot_chat.log')
 
     # Create a formatter and add it to the handler
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
