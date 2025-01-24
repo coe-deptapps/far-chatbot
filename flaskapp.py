@@ -7,9 +7,9 @@ from langchain.load.dump import dumps
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Production
-# from flaskapp.far_chatbot_chat import FarChatbotChat
+from flaskapp.far_chatbot_chat import FarChatbotChat
 # Development
-from far_chatbot_chat import FarChatbotChat
+# from far_chatbot_chat import FarChatbotChat
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
