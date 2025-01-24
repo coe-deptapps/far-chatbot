@@ -3,9 +3,9 @@ from langchain_openai import AzureChatOpenAI
 import logging
 
 # Production
-from flaskapp.far_chatbot_parser import FarChatbotParser
+# from flaskapp.far_chatbot_parser import FarChatbotParser
 # Development
-#from far_chatbot_parser import FarChatbotParser
+from far_chatbot_parser import FarChatbotParser
 
 llm = AzureChatOpenAI(
         deployment_name=os.environ['OPENAI_GPT_MODEL'],
