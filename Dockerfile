@@ -1,6 +1,4 @@
-# Use the official Python image from the Docker Hub
-#FROM python:3.9-slim
-FROM image-registry.openshift-image-registry.svc:5000/openshift/python:3.9
+FROM python:3.9-slim
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -32,5 +30,6 @@ EXPOSE 9001
 # Define environment variable
 ENV FLASK_APP=flaskapp.py
 
-# Run app.py when the container launches
-CMD ["flask", "run", "--host=0.0.0.0", "--port=9001"]
+# Start the gunicorn server (instead of the smaller flask server)
+#CMD ["flask", "run", "--host=0.0.0.0", "--port=9001"]
+CMD ["gunicorn","--config", "gunicorn_config.py", "flaskapp:app"]

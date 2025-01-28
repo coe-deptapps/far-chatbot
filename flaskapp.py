@@ -3,13 +3,8 @@ from flask import Flask, request, abort
 from flask_cors import CORS
 from langchain.load.dump import dumps
 
-# Add the project root directory to PYTHONPATH
-# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-# Production
-from flaskapp.far_chatbot_chat import FarChatbotChat
-# Development
-# from far_chatbot_chat import FarChatbotChat
+# Currently, the working directory is flaskapp/ in Docker. So add the parent directory to the path.
+from far_chatbot_chat import FarChatbotChat
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
