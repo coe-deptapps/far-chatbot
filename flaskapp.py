@@ -4,7 +4,7 @@ from flask_cors import CORS
 from langchain.load.dump import dumps
 
 # Currently, the working directory is flaskapp/ in Docker. So add the parent directory to the path.
-from flaskapp.far_chatbot_chat import FarChatbotChat
+from far_chatbot_chat import FarChatbotChat
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})

@@ -3,7 +3,7 @@ from langchain_openai import AzureChatOpenAI
 import logging
 
 # Currently, the working directory is flaskapp/ in Docker. So add the parent directory to the path.
-from flaskapp.far_chatbot_parser import FarChatbotParser
+from far_chatbot_parser import FarChatbotParser
 
 llm = AzureChatOpenAI(
         deployment_name=os.environ['OPENAI_GPT_MODEL'],
