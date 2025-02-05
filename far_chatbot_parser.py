@@ -14,12 +14,12 @@ import json
 # Sets the current working directory to be the same as the file.
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-try:
-    if load_dotenv('.env') is False:
-        raise TypeError
-except TypeError:
-    print('Unable to load .env file.')
-    quit()
+# try:
+#     if load_dotenv('.env') is False:
+#         raise TypeError
+# except TypeError:
+#     print('Unable to load .env file.')
+#     quit()
 
 llm = AzureChatOpenAI(
     deployment_name=os.environ['OPENAI_GPT_MODEL'],
