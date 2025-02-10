@@ -11,7 +11,7 @@ docker compose up
 ```
 Test that the application is running by visiting `http://localhost:8000/api/v1/health` in your browser. This route should return a response `Ok`.
 
-The `Nginx` proxy server runs on port `8080`. It sends traffic to the `Gunicorn` WSGI server that runs on port `9001` (not publicly accessible).
+The `Nginx` proxy server runs on port `8000`. It sends traffic to the `Gunicorn` WSGI server that runs on port `9001` (not publicly accessible).
 
 The `redis` instance runs on port `6379`. It stores chat histories.
 
