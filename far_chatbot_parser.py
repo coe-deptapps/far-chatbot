@@ -168,6 +168,7 @@ class FarChatbotParser:
                - Focus on querying the 'far_snapshot_service_positions' table.
                - For department-specific queries, use the 'departments' table for department names, abbreviations, and IDs.
                - Join tables using the 'farID' foreign key.
+               - Return faculty names in responses, where applicable. You can get the name by joining far.uniqname with profile.uniqname and using profile.prefName. 
 
             4. **Error Handling**:
                - Double-check your SQL query before execution.

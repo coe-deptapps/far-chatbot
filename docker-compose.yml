@@ -46,24 +46,24 @@ services:
         timeout: 10s
         retries: 3
 
-#    db:
-#      image: mariadb:latest
-#      container_name: ai_db
-#      restart: always
-#      environment:
-#        MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-#        MYSQL_DATABASE: ${DB_NAME}
-#        MYSQL_USER: ${DB_USER}
-#        MYSQL_PASSWORD: ${DB_PASS}
-#      volumes:
-#        - farchatdb:/var/lib/mysql
-#      ports:
-#        - "3307:3306"
-#      networks:
-#        - far_ai
+    db:
+      image: mariadb:latest
+      container_name: ai_db
+      restart: always
+      environment:
+        MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+        MYSQL_DATABASE: ${DB_NAME}
+        MYSQL_USER: ${DB_USER}
+        MYSQL_PASSWORD: ${DB_PASS}
+      volumes:
+        - farchatdb:/var/lib/mysql
+      ports:
+        - "3307:3306"
+      networks:
+        - far_ai
 
-#volumes:
-#  farchatdb:
+volumes:
+  farchatdb:
 
 networks:
   far_ai:

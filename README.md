@@ -15,8 +15,21 @@ The `Nginx` proxy server runs on port `8000`. It sends traffic to the `Gunicorn`
 
 The `redis` instance runs on port `6379`. It stores chat histories.
 
-### Environment Variables
-The application uses environment variables for configuration. Create a `.env` file in the root directory and add the following variables (you will need to get some of these from Chris Puzzuoli):
+### Local database
+<strong>The first time you run the application, you need to create the database schema.</strong>
+
+The following things are needed that are NOT included in this repository for security reasons:
+1. The .env variables for the database connection (though you can set these as you wish). <pre>DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME</pre>
+2. The copy of the database .sql file that is being used for testing queries for chat accuracy. Ask Chris Puzzuoli for this.
+
+The first time you run this project, also run the following command to copy the schema into the database container:
+```bash
+docker exec -i ai_db mariadb --user=[user from env] --password=[password from env] far < /local/path/to/far.sql
+```
+
+The local installation uses a Docker container for the database. The database is accessible on your machine on port `3307`.
+
+### Local environment variables
 ```bash
 APP_ENV=development
 OPENAI_API_KEY=[your key]
@@ -33,8 +46,17 @@ LANGCHAIN_TRACING_V2=true
 LDAP_PASS=[ldap password]
 
 # Dev Miserver
-DB_HOST=[dev host]
-DB_USER=[dev username]
-DB_PASS=[dev password]
-DB_NAME=far_chatbot_test
+# DB_HOST=[dev host]
+# DB_USER=[dev username]
+# DB_PASS=[dev password]
+# DB_NAME=far_chatbot_test
+# DB_PORT=3306
+
+# Dev Local (docker container 'db')
+DB_ROOT_PASSWORD=secret
+DB_CONNECTION=mysql
+DB_HOST=db
+DB_NAME=far
+DB_USER=root
+DB_PASS=secret
 DB_PORT=3306
