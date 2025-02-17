@@ -77,8 +77,8 @@ class FarChatbotParser:
         toolkit = SQLDatabaseToolkit(db=self.db, llm=llm)
         return toolkit.get_tools()
 
-    def get_or_create_conversation(self, thread_id):
-        history = self.redis_client.get(thread_id)
+    async def get_or_create_conversation(self, thread_id):
+        history = await self.redis_client.get(thread_id)
         if history is None:
             return []
         return json.loads(history)
@@ -88,15 +88,30 @@ class FarChatbotParser:
 
     def construct_prompt(self, conversation_history, retrieved_data):
         """
-        After the retrieval step, construct an additional prompt based on the user's query, the conversation so far, and the retrieved data for the new question.
-        :param conversation_history:
-        :param retrieved_data:
-        :return:
+        Construct an additional prompt based on the user's query, the conversation so far, and the retrieved data.
+
+        :param conversation_history: A log of the discussion with the user.
+        :param retrieved_data: Data retrieved from the database in response to the latest query.
+        :return: A formatted string to guide the AI response generation.
         """
-        context = (f"Conversation history: {conversation_history}\nRetrieved Data: {retrieved_data}."
-                   f"\nBased on the retrieved data and the conversation history, generate a comprehensive response."
-                   f"\nKeep in mind that you are responding to questions about faculty service data in Faculty Activity Reports (FAR) for the University of Michigan."
-                   f"\nIf you believe the user's question is not related to faculty service, do not answer it. Please inform them and ask them to rephrase it.")
+
+        context = (
+            "=== CONTEXT ===\n"
+            "You are responding to questions about faculty service data in Faculty Activity Reports (FAR) for the University of Michigan.\n\n"
+
+            "=== CONVERSATION HISTORY ===\n"
+            f"{conversation_history}\n\n"
+
+            "=== RETRIEVED DATA ===\n"
+            f"{retrieved_data}\n\n"
+
+            "=== TASK ===\n"
+            "Analyze the retrieved data alongside the conversation history to generate a comprehensive response.\n"
+            "If the user's question is related to faculty service data, provide an insightful answer based on the data retrieved.\n"
+            "IF the question is not related to faculty service, inform the user with the following response template:\n"
+            "\"I'm currently only able to handle inquiries related to faculty service data. Please rephrase your question to be within this context.\"\n"
+        )
+
         return context
 
     def chat(self, question, thread_id=''):
@@ -108,30 +123,65 @@ class FarChatbotParser:
         try:
             tools = self.create_tools()
 
-            SQL_PREFIX = """You are an agent designed to interact with a SQL database that stores Faculty Activity Reports (FAR) data for the University of Michigan.
-                        Specifically, you are answering questions related to faculty service data.
-                        If the question is not related to faculty service (even if it is related to the FAR database generally), do not continue except to tell the user that you are unable to answer the question and ask them to rephrase it so that it is related to faculty service data.
-                        
-                        If the question is faculty service related, continue following the instructions.
-                        Given an input question, create a syntactically correct SQL query to run, then look at the results of the query and return the answer.
-                        Unless the user specifies a specific number of examples they wish to obtain, always limit your query to at most 5 results.
-                        You can order the results by a relevant column to return the most interesting examples in the database.
-                        Never query for all the columns from a specific table, only ask for the relevant columns given the question.
-                        You have access to tools for interacting with the database.
-                        Only use the below tools. Only use the information returned by the below tools to construct your final answer.
-                        You MUST double check your query before executing it. If you get an error while executing a query, rewrite the query and try again.
+            # SYSTEM_PROMPT = """You are an agent designed to interact with a SQL database that stores Faculty Activity Reports (FAR) data for the University of Michigan.
+            #             Specifically, you are answering questions related to faculty service data.
+            #             If the question is not related to faculty service (even if it is related to the FAR database generally), do not continue except to tell the user that you are unable to answer the question and ask them to rephrase it so that it is related to faculty service data.
+            #
+            #             If the question is faculty service related, continue following the instructions.
+            #             Given an input question, create a syntactically correct SQL query to run, then look at the results of the query and return the answer.
+            #             Unless the user specifies a specific number of examples they wish to obtain, always limit your query to at most 5 results.
+            #             You can order the results by a relevant column to return the most interesting examples in the database.
+            #             Never query for all the columns from a specific table, only ask for the relevant columns given the question.
+            #             You have access to tools for interacting with the database.
+            #             Only use the below tools. Only use the information returned by the below tools to construct your final answer.
+            #             You MUST double check your query before executing it. If you get an error while executing a query, rewrite the query and try again.
+            #
+            #             DO NOT make any DML statements (INSERT, UPDATE, DELETE, DROP etc.) to the database.
+            #
+            #             To start you should ALWAYS look at the tables in the database to see what you can query.
+            #             Do NOT skip this step.
+            #             Then you should query the schema of the most relevant tables. The table you will want to focus on most is 'far_snapshot_service_positions'.
+            #
+            #             If you are asked about department-specific questions, you can look up the name of and the department ID for the department in the departments table.
+            #             Most tables have a farID foreign key. You can use that column to join on far.far, which has the deptID field. Departments will usually be referred to by their acronym (e.g. CSE, BME, AERO, etc.), but you can look up the full name in the departments table.
+            #
+            #             Answers should always return the name of the department, even if the user asked the question in terms of the department ID.
+            #             """
 
-                        DO NOT make any DML statements (INSERT, UPDATE, DELETE, DROP etc.) to the database.
+            system_prompt = """
+            You are an agent designed to interact with a SQL database that stores Faculty Activity Reports (FAR) data for the University of Michigan. Your primary focus is answering questions related to faculty service data.
 
-                        To start you should ALWAYS look at the tables in the database to see what you can query.
-                        Do NOT skip this step.
-                        Then you should query the schema of the most relevant tables. The table you will want to focus on most is 'far_snapshot_service_positions'.
+            INSTRUCTIONS:
+            1. **Question Scope**:
+               - IF the input question is NOT related to faculty service:
+                 - THEN respond that you can only handle questions about faculty service data and ask the user to rephrase.
+               - ELSE proceed with the instructions below.
 
-                        If you are asked about department-specific questions, you can look up the name of and the department ID for the department in the departments table.
-                        Most tables have a farID foreign key. You can use that column to join on far.far, which has the deptID field. Departments will usually be referred to by their acronym (e.g. CSE, BME, AERO, etc.), but you can look up the full name in the departments table.
-                        
-                        Answers should always return the name of the department, even if the user asked the question in terms of the department ID.
-                        """
+            2. **SQL Query Construction**:
+               - Create a syntactically correct SQL query based on the input question.
+               - Limit results to 5 entries, unless otherwise specified.
+               - Order results by a relevant column for most interesting examples.
+               - Avoid querying all columns; SELECT only those relevant to the query.
+
+            3. **Database Interaction**:
+               - Initially examine available database tables to determine query possibilities.
+               - Focus on querying the 'far_snapshot_service_positions' table.
+               - For department-specific queries, use the 'departments' table for department names, abbreviations, and IDs.
+
+            4. **Error Handling**:
+               - Double-check your SQL query before execution.
+               - IF an error occurs during execution, modify and retry the query.
+               - Make sure if asked for a COUNT, that it is correct. 
+
+            5. **Answer Format**:
+               - Return department names in responses, even if the question was about department IDs.
+
+            PROHIBITIONS:
+            - Do NOT perform any DML operations like INSERT, UPDATE, DELETE, DROP.
+
+            UTILITIES:
+            - You have access to tools for database interaction; use only these tools for constructing your final answer.
+            """
 
             if thread_id == '':
                 # Randomly generate a thread id if one is not provided
@@ -143,12 +193,12 @@ class FarChatbotParser:
 
             self.logger.debug(f"Asking question: {question}")
 
-            system_message = SystemMessage(content=SQL_PREFIX)
+            system_message = SystemMessage(content=system_prompt)
             # Create a React agent to interact with the database
             graph = create_react_agent(llm, tools, messages_modifier=system_message, checkpointer=MemorySaver())
             config = {
                 "configurable": {"thread_id": thread_id},
-                "recursion_limit": 50 # default is 25
+                "recursion_limit": 50  # default is 25
             }
 
             # Step 1: Retrieve Data (the "R" in RAG)
@@ -165,7 +215,6 @@ class FarChatbotParser:
             except Exception as e:
                 self.logger.error(f"An error occurred while retrieving data: {str(e)}")
                 raise
-
 
             self.logger.debug(f"Retrieved SQL data: {retrieved_data}")
 
