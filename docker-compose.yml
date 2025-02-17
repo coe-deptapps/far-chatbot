@@ -3,19 +3,17 @@ services:
     flask:
         build: .
         container_name: ai_flask
-#        ports:
-#            - "9001:9001"  # DO NOT expose the port to the host. Everything is done through the nginx container (port 8000).
         volumes:
             - .:/flaskapp
         depends_on:
             - redis
         networks:
             - far_ai
-        healthcheck:
-          test: [ "CMD", "curl", "-f", "http://localhost:9001/api/v1/health" ]
-          interval: 30s
-          timeout: 10s
-          retries: 3
+#        healthcheck:
+#          test: [ "CMD", "curl", "-f", "http://localhost:9001/api/v1/health" ]
+#          interval: 30s
+#          timeout: 10s
+#          retries: 3
     # Redis is the in-memory data store that will be used to store chat histories.
     redis:
       image: redis
@@ -47,6 +45,25 @@ services:
         interval: 30s
         timeout: 10s
         retries: 3
+
+#    db:
+#      image: mariadb:latest
+#      container_name: ai_db
+#      restart: always
+#      environment:
+#        MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+#        MYSQL_DATABASE: ${DB_NAME}
+#        MYSQL_USER: ${DB_USER}
+#        MYSQL_PASSWORD: ${DB_PASS}
+#      volumes:
+#        - farchatdb:/var/lib/mysql
+#      ports:
+#        - "3307:3306"
+#      networks:
+#        - far_ai
+
+#volumes:
+#  farchatdb:
 
 networks:
   far_ai:

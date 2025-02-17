@@ -63,7 +63,7 @@ class FarChatbotParser:
     def sql_connect(self):
         try:
             # Connect to the database using the environment variables.
-            db_conn_str = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASS')}@{os.getenv('DB_SERVER')}/{os.getenv('DB_NAME')}"
+            db_conn_str = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASS')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
             self.db = SQLDatabase.from_uri(db_conn_str)
             self.logger.info(f"Database connection succeeded! {db_conn_str}")
         except pymysql.OperationalError as e:
@@ -77,8 +77,8 @@ class FarChatbotParser:
         toolkit = SQLDatabaseToolkit(db=self.db, llm=llm)
         return toolkit.get_tools()
 
-    async def get_or_create_conversation(self, thread_id):
-        history = await self.redis_client.get(thread_id)
+    def get_or_create_conversation(self, thread_id):
+        history = self.redis_client.get(thread_id)
         if history is None:
             return []
         return json.loads(history)
@@ -123,7 +123,7 @@ class FarChatbotParser:
         try:
             tools = self.create_tools()
 
-            # SYSTEM_PROMPT = """You are an agent designed to interact with a SQL database that stores Faculty Activity Reports (FAR) data for the University of Michigan.
+            # system_prompt = """You are an agent designed to interact with a SQL database that stores Faculty Activity Reports (FAR) data for the University of Michigan.
             #             Specifically, you are answering questions related to faculty service data.
             #             If the question is not related to faculty service (even if it is related to the FAR database generally), do not continue except to tell the user that you are unable to answer the question and ask them to rephrase it so that it is related to faculty service data.
             #
@@ -167,6 +167,7 @@ class FarChatbotParser:
                - Initially examine available database tables to determine query possibilities.
                - Focus on querying the 'far_snapshot_service_positions' table.
                - For department-specific queries, use the 'departments' table for department names, abbreviations, and IDs.
+               - Join tables using the 'farID' foreign key.
 
             4. **Error Handling**:
                - Double-check your SQL query before execution.

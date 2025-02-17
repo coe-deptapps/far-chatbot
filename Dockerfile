@@ -32,4 +32,5 @@ ENV FLASK_APP=flaskapp.py
 
 # Start the gunicorn server (instead of the smaller flask server)
 #CMD ["flask", "run", "--host=0.0.0.0", "--port=9001"]
-CMD ["gunicorn","--config", "gunicorn_config.py", "flaskapp:app"]
+# You aren't supposed to use --reload on production, but it allows for hot reloading on code changes in development.
+CMD ["gunicorn", "--reload", "--config", "gunicorn_config.py", "flaskapp:app"]
